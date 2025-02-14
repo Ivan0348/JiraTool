@@ -164,16 +164,18 @@
                     <th>Title</th>
                     <th>Time Spent</th>
                     <th>Original Estimate</th>
+                    <th>Work Ratio</th>
                     <th>Status</th>
                     <th>Issue</th>
                     <th>Sprint</th>
                 </tr>
-                {% for assignee, title, time_spent, original_estimate, status, issue, sprint in items | sort(attribute='1') | sort(attribute='0') %}
+                {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in items | sort(attribute='1') | sort(attribute='0') %}
                 <tr>
                     <td>{{ assignee }}</td>
                     <td>{{ title }}</td>
                     <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
                     <td>{{ original_estimate or '-' }}</td>
+                    <td>{{ work_ratio }}</td>
                     <td>{{ status or '-' }}</td>
                     <td>{{ issue or '-' }}</td>
                     <td>{{ sprint or '-' }}</td>

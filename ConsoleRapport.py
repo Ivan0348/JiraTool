@@ -36,16 +36,17 @@ def sum_time(csv_file):
             reader = csv.DictReader(f)
             for row in reader:
                 title = row.get('Title', '')
-                tag = extract_tag(title)
+                tag = extract_tag(title.upper())
                 assignee = row.get('Assignee', 'Unknown')
                 time_spent = parse_time(row.get('Time spent', '0m'))
                 original_estimate = row.get('Original estimate', 'N/A')
+                work_ratio = work_ratio_time_to_percentage(row.get('Work Ratio', '-'))
                 status = row.get('Status', 'N/A')
                 issue = row.get('Issue', 'N/A')
                 sprint = row.get('Sprint', 'N/A')
 
                 tag_times[tag][assignee] += time_spent
-                tag_items[tag].append((assignee, title, time_spent, original_estimate, status, issue, sprint))
+                tag_items[tag].append((assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint))
 
     except Exception as e:
         print(f"Error reading file: {e}")
@@ -87,6 +88,20 @@ def display_assignee_totals(pva_totals):
     for assignee, total_minutes in assignee_totals.items():
         print(f"{assignee}: {total_minutes // 60}h {total_minutes % 60}m")
 
+def work_ratio_time_to_percentage(time_str):
+    print(time_str)
+    if time_str == "":
+        return '-'
+    else:
+        minutes, seconds = 0, 0
+        if 'm' in time_str:
+            minutes = int(time_str.split('m')[0].strip())
+            time_str = time_str.split('m')[-1].strip()
+        if 's' in time_str:
+            seconds = int(time_str.replace('s', '').strip())
+
+        percentage = (minutes * 60) + seconds
+        return f"{percentage:.2f}%"
 
 def display_results(tag_items, max_title_lengths):
     """
@@ -102,10 +117,11 @@ def display_results(tag_items, max_title_lengths):
         max_title_length = max_title_lengths.get(tag, 40)
 
         # Weergave van taken met alle relevante velden en uitlijning
-        for assignee, title, time_spent, original_estimate, status, issue, sprint in sorted_items:
+        for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in sorted_items:
             print(f"- {assignee:<12} | {title:<{max_title_length}} | "
                   f"Time spent: {time_spent // 60:>3}h {time_spent % 60:>2}m | "
                   f"Original estimate: {original_estimate or '-':<10} | "
+                  f"Work ratio: {work_ratio or '-':<10} | "
                   f"Status: {status:<12} | "
                   f"Issue: {issue:<10} | "
                   f"Sprint: {sprint or 'None':<20} |")
