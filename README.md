@@ -1,2 +1,2 @@
 # JiraTool
-stage tool
+tool
