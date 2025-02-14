@@ -1,2 +1,2 @@
 # JiraTool
-tool
+tool voor Jira report
