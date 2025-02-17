@@ -96,7 +96,6 @@ def display_assignee_totals(item_totals):
 
 
 def work_ratio_time_to_percentage(time_str):
-    print(time_str)
     if time_str == "":
         return '-'
     else:

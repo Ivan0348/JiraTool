@@ -89,7 +89,6 @@ def display_assignee_totals(pva_totals):
         print(f"{assignee}: {total_minutes // 60}h {total_minutes % 60}m")
 
 def work_ratio_time_to_percentage(time_str):
-    print(time_str)
     if time_str == "":
         return '-'
     else:
