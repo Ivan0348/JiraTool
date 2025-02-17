@@ -105,6 +105,13 @@
         .toggle-content {
             display: none;
         }
+
+        .max_height {
+            max-height: 100px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
     </style>
     <script>
         function toggleSection(tag) {
@@ -153,10 +160,12 @@
 
     <!-- Details per tag -->
     {% for tag, items in tag_items.items() %}
-    <div class="section" onclick="toggleSection('{{ tag }}')">
-        <h2>{{ tag }}
-            <span class="toggle-icon" id="{{ tag }}-icon">&#9654;</span>
-        </h2>
+    <div class="section">
+        <div onclick="toggleSection('{{ tag }}')" class="max_height">
+            <h2>{{ tag }}
+                <span class="toggle-icon" id="{{ tag }}-icon">&#9654;</span>
+            </h2>
+        </div>
         <div class="toggle-content" id="{{ tag }}-content">
             <table>
                 <tr>

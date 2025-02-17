@@ -134,7 +134,7 @@ def display_results(items, max_title_lengths):
                   f"Work ratio: {work_ratio or '-':<10} | "
                   f"Status: {status or '-':<12} | "
                   f"Issue: {issue or '-':<10} | "
-                  f"Sprint: {sprint or '-':<20} |")
+                  f"Sprint: {sprint or '-':<20}")
 
 @app.route("/")
 def index():

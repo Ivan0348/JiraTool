@@ -124,7 +124,7 @@ def display_results(tag_items, max_title_lengths):
                   f"Work ratio: {work_ratio or '-':<10} | "
                   f"Status: {status:<12} | "
                   f"Issue: {issue:<10} | "
-                  f"Sprint: {sprint or 'None':<20} |")
+                  f"Sprint: {sprint or 'None':<20}")
 
 
 def main():
