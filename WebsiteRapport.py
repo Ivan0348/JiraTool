@@ -10,7 +10,7 @@ tag_items = {}
 @app.route("/")
 def index():
     """Render de resultaten op een webpagina."""
-    return render_template("index.html", totals=totals, tag_items=tag_items)
+    return render_template("indexDatatables.html", totals=totals, tag_items=tag_items)
 
 
 def main():
