@@ -78,14 +78,16 @@ def display_assignee_totals(item_totals):
 
     for tag, assignees in item_totals.items():
         for assignee, time_str in assignees.items():
-            hours, minutes = map(int, time_str[:-1].split('h'))
-            total_minutes = hours * 60 + minutes
-            assignee_totals[assignee] += total_minutes
+            if assignee != '':
+                hours, minutes = map(int, time_str[:-1].split('h'))
+                total_minutes = hours * 60 + minutes
+                assignee_totals[assignee] += total_minutes
 
     # Print output
     print("### Totale tijd per persoon ###")
     for assignee, total_minutes in assignee_totals.items():
-        print(f"{assignee}: {total_minutes // 60}h {total_minutes % 60}m")
+        if assignee != '':
+            print(f"{assignee}: {total_minutes // 60}h {total_minutes % 60}m")
 
 
 def work_ratio_time_to_percentage(time_str):

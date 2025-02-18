@@ -8,6 +8,7 @@ totals = {}
 tag_items = {}
 
 HTML_TEMPLATE = """ 
+
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -158,8 +159,10 @@ HTML_TEMPLATE = """
             {% set assignee_totals = {} %}
             {% for tag, assignees in totals.items() %}
                 {% for assignee, total_time in assignees.items() %}
-                    {% set minutes = (total_time.split('h')[0]|int) * 60 + (total_time.split('h')[1].replace('m', '')|int) %}
-                    {% set _ = assignee_totals.update({assignee: assignee_totals.get(assignee, 0) + minutes}) %}
+                    {% if assignee != '' %}
+                        {% set minutes = (total_time.split('h')[0]|int) * 60 + (total_time.split('h')[1].replace('m', '')|int) %}
+                        {% set _ = assignee_totals.update({assignee: assignee_totals.get(assignee, 0) + minutes}) %}
+                    {% endif %}
                 {% endfor %}
             {% endfor %}
             <tbody>
@@ -198,8 +201,8 @@ HTML_TEMPLATE = """
                 <tbody>
                 {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in items | sort(attribute='1') | sort(attribute='0') %}
                     <tr>
-                        <td>{{ assignee }}</td>
-                        <td>{{ title }}</td>
+                        <td>{{ assignee or 'NONE' }}</td>
+                        <td>{{ title or '-' }}</td>
                         <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
                         <td>{{ original_estimate or '-' }}</td>
                         <td>{{ work_ratio }}</td>
@@ -223,7 +226,7 @@ HTML_TEMPLATE = """
                 <tbody>
                 {% for assignee, total_time in totals[tag].items() | sort %}
                     <tr>
-                        <td>{{ assignee }}</td>
+                        <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ total_time }}</td>
                     </tr>
                 {% endfor %}
@@ -252,6 +255,7 @@ HTML_TEMPLATE = """
  </div>
 </body>
 </html>
+
  """
 
 
