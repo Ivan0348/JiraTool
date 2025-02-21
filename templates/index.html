@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jira Report</title>
+    <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
     <style>
         /* Algemene body stijl */
         body {
@@ -46,7 +47,7 @@
             padding: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             width: 95%;
-            max-width: 1200px;
+            max-width: 1600px;
         }
 
         /* Tabel styling */
@@ -131,17 +132,19 @@
     </script>
 </head>
 <body>
-
+ <div class="container">
     <h1>Jira Report</h1>
 
     <!-- Totale tijd per persoon over alle tags -->
     <div class="section">
         <h2>Totale tijd per persoon</h2>
         <table>
-            <tr>
-                <th>Assignee</th>
-                <th>Totale tijd</th>
-            </tr>
+            <thead>
+                <tr>
+                    <th>Assignee</th>
+                    <th>Totale tijd</th>
+                </tr>
+            </thead>
             {% set assignee_totals = {} %}
             {% for tag, assignees in totals.items() %}
                 {% for assignee, total_time in assignees.items() %}
@@ -151,12 +154,14 @@
                     {% endif %}
                 {% endfor %}
             {% endfor %}
-            {% for assignee, total_minutes in assignee_totals.items() | sort %}
-            <tr>
-                <td>{{ assignee }}</td>
-                <td>{{ total_minutes // 60 }}h {{ total_minutes % 60 }}m</td>
-            </tr>
-            {% endfor %}
+            <tbody>
+                {% for assignee, total_minutes in assignee_totals.items() | sort %}
+                <tr>
+                    <td>{{ assignee }}</td>
+                    <td>{{ total_minutes // 60 }}h {{ total_minutes % 60 }}m</td>
+                </tr>
+                {% endfor %}
+            </tbody>
         </table>
     </div>
 
@@ -169,44 +174,58 @@
             </h2>
         </div>
         <div class="toggle-content" id="{{ tag }}-content">
-            <table>
-                <tr>
-                    <th>Assignee</th>
-                    <th>Title</th>
-                    <th>Time Spent</th>
-                    <th>Original Estimate</th>
-                    <th>Work Ratio</th>
-                    <th>Status</th>
-                    <th>Issue</th>
-                    <th>Sprint</th>
-                </tr>
-                {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in items | sort(attribute='1') | sort(attribute='0') %}
-                <tr>
-                    <td>{{ assignee  or '-' }}</td>
-                    <td>{{ title or '-' }}</td>
-                    <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
-                    <td>{{ original_estimate or '-' }}</td>
-                    <td>{{ work_ratio }}</td>
-                    <td>{{ status or '-' }}</td>
-                    <td>{{ issue or '-' }}</td>
-                    <td>{{ sprint or '-' }}</td>
-                </tr>
+            <table class="dataframe" id="datatable2">
+                <thead>
+                    <tr>
+                        <th>Assignee</th>
+                        <th>Title</th>
+                        <th>Time Spent</th>
+                        <th>Original Estimate</th>
+                        <th>Work Ratio</th>
+                        <th>Status</th>
+                        <th>Issue</th>
+                        <th>Sprint</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, issue_with_url, sprint in items | sort(attribute='1') | sort(attribute='0') %}
+                    <tr>
+                        <td>{{ assignee or 'NONE' }}</td>
+                        <td>{{ title or '-' }}</td>
+                        <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
+                        <td>{{ original_estimate or '-' }}</td>
+                        <td>{{ work_ratio }}</td>
+                        <td>{{ status or '-' }}</td>
+                        <td>
+                            {% if issue %}
+                                <a href="{{ issue_with_url }}" target="_blank">{{ issue }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                    </td>
+                        <td>{{ sprint or '-' }}</td>
+                    </tr>
                 {% endfor %}
+                </tbody>
             </table>
 
             <!-- Totale tijd per assignee per tag (onder de takenlijst) -->
             <h3>Totale tijd per persoon voor {{ tag }}</h3>
             <table>
-                <tr>
-                    <th>Assignee</th>
-                    <th>Totale tijd</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Assignee</th>
+                        <th>Totale tijd</th>
+                    </tr>
+                </thead>
+                <tbody>
                 {% for assignee, total_time in totals[tag].items() | sort %}
-                <tr>
-                    <td>{{ assignee or '-' }}</td>
-                    <td>{{ total_time }}</td>
-                </tr>
+                    <tr>
+                        <td>{{ assignee or 'NONE' }}</td>
+                        <td>{{ total_time }}</td>
+                    </tr>
                 {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
@@ -215,6 +234,19 @@
     <footer>
         <p>&copy; 2025 Jira Report - Alle rechten voorbehouden.</p>
     </footer>
-
+    <script src="https://code.jquery.com/jquery-1.12.4.js" type="text/javascript"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('table.dataframe').each(function() {
+                 $(this).DataTable({
+                    "paging": false,
+                    "info": false,
+                    "lengthChange": false
+                });
+            });
+        });
+    </script>
+ </div>
 </body>
 </html>

@@ -199,7 +199,7 @@ HTML_TEMPLATE = """
                     </tr>
                 </thead>
                 <tbody>
-                {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in items | sort(attribute='1') | sort(attribute='0') %}
+                {% for assignee, title, time_spent, original_estimate, work_ratio, status, issue, issue_with_url, sprint in items | sort(attribute='1') | sort(attribute='0') %}
                     <tr>
                         <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ title or '-' }}</td>
@@ -207,7 +207,13 @@ HTML_TEMPLATE = """
                         <td>{{ original_estimate or '-' }}</td>
                         <td>{{ work_ratio }}</td>
                         <td>{{ status or '-' }}</td>
-                        <td>{{ issue or '-' }}</td>
+                        <td>
+                            {% if issue %}
+                                <a href="{{ issue_with_url }}" target="_blank">{{ issue }}</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                    </td>
                         <td>{{ sprint or '-' }}</td>
                     </tr>
                 {% endfor %}

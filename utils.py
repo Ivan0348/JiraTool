@@ -41,12 +41,13 @@ def sum_time(csv_file):
                 work_ratio = work_ratio_time_to_percentage(row.get('Work Ratio', '-'))
                 status = row.get('Status', 'N/A')
                 issue = row.get('Issue', 'N/A')
+                issue_with_url = "https://my-lex.atlassian.net/browse/" + issue
                 sprint = row.get('Sprint', 'N/A')
                 title_without_tag = ':'.join(title.split(':')[1:]).strip()
 
                 tag_times[tag][assignee] += time_spent
                 tag_items[tag].append((assignee, title_without_tag, time_spent, original_estimate, work_ratio,
-                                       status, issue, sprint))
+                                       status, issue, issue_with_url, sprint))
     except Exception as e:
         print(f"Error reading file: {e}")
         return {}, {}
@@ -122,7 +123,7 @@ def display_results(items, max_title_lengths):
         # Maximale titel lengte per tag
         max_title_length = max_title_lengths.get(tag, 40)
 
-        for assignee, title, time_spent, original_estimate, work_ratio, status, issue, sprint in sorted_items:
+        for assignee, title, time_spent, original_estimate, work_ratio, status, issue, issue_with_url, sprint in sorted_items:
             time_display = f"{time_spent // 60:>3}h {time_spent % 60:>2}m" if time_spent > 0 else "-"
 
             print(f"- {assignee:<12} | {title:<{max_title_length}} | "
@@ -130,5 +131,5 @@ def display_results(items, max_title_lengths):
                   f"Original estimate: {original_estimate or '-':<15} | "
                   f"Work ratio: {work_ratio or '-':<10} | "
                   f"Status: {status or '-':<12} | "
-                  f"Issue: {issue or '-':<10} | "
+                  f"Issue: {issue_with_url or '-'} | "
                   f"Sprint: {sprint or '-':<20}")
