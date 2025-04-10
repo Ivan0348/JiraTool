@@ -5,6 +5,7 @@ from utils import sum_time, get_max_title_length, display_assignee_totals, displ
 
 app = Flask(__name__)
 totals = {}
+original_totals = {}
 tag_items = {}
 
 HTML_TEMPLATE = """ 
@@ -154,9 +155,11 @@ HTML_TEMPLATE = """
                 <tr>
                     <th>Assignee</th>
                     <th>Totale tijd</th>
+                    <th>Originele tijd</th>
                 </tr>
             </thead>
             {% set assignee_totals = {} %}
+            {% set original_assignee_totals = {} %}
             {% for tag, assignees in totals.items() %}
                 {% for assignee, total_time in assignees.items() %}
                     {% if assignee != '' %}
@@ -165,11 +168,20 @@ HTML_TEMPLATE = """
                     {% endif %}
                 {% endfor %}
             {% endfor %}
+            {% for tag, assignees in original_totals.items() %}
+                {% for assignee, original_time in assignees.items() %}
+                    {% if assignee != '' %}
+                        {% set original_minutes = (original_time.split('h')[0]|int) * 60 + (original_time.split('h')[1].replace('m', '')|int) %}
+                        {% set _ = original_assignee_totals.update({assignee: original_assignee_totals.get(assignee, 0) + original_minutes}) %}
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
             <tbody>
                 {% for assignee, total_minutes in assignee_totals.items() | sort %}
                 <tr>
                     <td>{{ assignee }}</td>
                     <td>{{ total_minutes // 60 }}h {{ total_minutes % 60 }}m</td>
+                    <td>{{ (original_assignee_totals.get(assignee, 0) // 60) }}h {{ (original_assignee_totals.get(assignee, 0) % 60) }}m</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -204,7 +216,7 @@ HTML_TEMPLATE = """
                         <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ title or '-' }}</td>
                         <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
-                        <td>{{ original_estimate or '-' }}</td>
+                        <td>{% if original_estimate %}{{ original_estimate // 60 }}h {{ original_estimate % 60 }}m{% else %}-{% endif %}</td>
                         <td>{{ work_ratio }}</td>
                         <td>{{ status or '-' }}</td>
                         <td>
@@ -227,6 +239,7 @@ HTML_TEMPLATE = """
                     <tr>
                         <th>Assignee</th>
                         <th>Totale tijd</th>
+                        <th>Originele tijd</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -234,6 +247,7 @@ HTML_TEMPLATE = """
                     <tr>
                         <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ total_time }}</td>
+                        <td>{{ original_totals[tag].get(assignee, '-') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -262,13 +276,14 @@ HTML_TEMPLATE = """
 </body>
 </html>
 
+
  """
 
 
 @app.route("/")
 def index():
     """Render de resultaten op een webpagina."""
-    return render_template_string(HTML_TEMPLATE, totals=totals, tag_items=tag_items)
+    return render_template_string(HTML_TEMPLATE, totals=totals, tag_items=tag_items, original_totals=original_totals)
 
 
 def main():
@@ -278,8 +293,8 @@ def main():
     csv_file = filedialog.askopenfilename(title="Select CSV File", filetypes=[("CSV Files", "*.csv")])
 
     if csv_file:
-        global totals, tag_items
-        totals, tag_items = sum_time(csv_file)
+        global totals, tag_items,original_totals
+        totals, original_totals, tag_items = sum_time(csv_file)
 
         if totals:
             max_title_lengths = get_max_title_length(tag_items)

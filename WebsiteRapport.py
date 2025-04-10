@@ -5,12 +5,13 @@ from utils import sum_time, get_max_title_length, display_assignee_totals, displ
 
 app = Flask(__name__)
 totals = {}
+original_totals = {}
 tag_items = {}
 
 @app.route("/")
 def index():
     """Render de resultaten op een webpagina."""
-    return render_template("index.html", totals=totals, tag_items=tag_items)
+    return render_template("index.html", totals=totals, tag_items=tag_items, original_totals=original_totals)
 
 
 def main():
@@ -20,10 +21,10 @@ def main():
     csv_file = filedialog.askopenfilename(title="Select CSV File", filetypes=[("CSV Files", "*.csv")])
 
     if csv_file:
-        global totals, tag_items
-        totals, tag_items = sum_time(csv_file)
+        global totals, tag_items, original_totals
+        totals, original_totals, tag_items = sum_time(csv_file)
 
-        if totals:
+        if totals and original_totals:
             max_title_lengths = get_max_title_length(tag_items)
             display_assignee_totals(totals)
             display_results(tag_items, max_title_lengths)

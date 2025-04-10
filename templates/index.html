@@ -143,9 +143,11 @@
                 <tr>
                     <th>Assignee</th>
                     <th>Totale tijd</th>
+                    <th>Originele tijd</th>
                 </tr>
             </thead>
             {% set assignee_totals = {} %}
+            {% set original_assignee_totals = {} %}
             {% for tag, assignees in totals.items() %}
                 {% for assignee, total_time in assignees.items() %}
                     {% if assignee != '' %}
@@ -154,11 +156,20 @@
                     {% endif %}
                 {% endfor %}
             {% endfor %}
+            {% for tag, assignees in original_totals.items() %}
+                {% for assignee, original_time in assignees.items() %}
+                    {% if assignee != '' %}
+                        {% set original_minutes = (original_time.split('h')[0]|int) * 60 + (original_time.split('h')[1].replace('m', '')|int) %}
+                        {% set _ = original_assignee_totals.update({assignee: original_assignee_totals.get(assignee, 0) + original_minutes}) %}
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
             <tbody>
                 {% for assignee, total_minutes in assignee_totals.items() | sort %}
                 <tr>
                     <td>{{ assignee }}</td>
                     <td>{{ total_minutes // 60 }}h {{ total_minutes % 60 }}m</td>
+                    <td>{{ (original_assignee_totals.get(assignee, 0) // 60) }}h {{ (original_assignee_totals.get(assignee, 0) % 60) }}m</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -193,7 +204,7 @@
                         <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ title or '-' }}</td>
                         <td>{% if time_spent %}{{ time_spent // 60 }}h {{ time_spent % 60 }}m{% else %}-{% endif %}</td>
-                        <td>{{ original_estimate or '-' }}</td>
+                        <td>{% if original_estimate %}{{ original_estimate // 60 }}h {{ original_estimate % 60 }}m{% else %}-{% endif %}</td>
                         <td>{{ work_ratio }}</td>
                         <td>{{ status or '-' }}</td>
                         <td>
@@ -216,6 +227,7 @@
                     <tr>
                         <th>Assignee</th>
                         <th>Totale tijd</th>
+                        <th>Originele tijd</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -223,6 +235,7 @@
                     <tr>
                         <td>{{ assignee or 'NONE' }}</td>
                         <td>{{ total_time }}</td>
+                        <td>{{ original_totals[tag].get(assignee, '-') }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>

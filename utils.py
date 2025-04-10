@@ -4,14 +4,14 @@ from collections import defaultdict
 
 
 def parse_time(time_str):
-    """
-    Converteert tijd-strings zoals '1h 30m' naar minuten.
-    """
-    if not time_str:
-        return 0
-    hours = sum(int(x[:-1]) * 60 for x in re.findall(r'\d+h', time_str))
-    minutes = sum(int(x[:-1]) for x in re.findall(r'\d+m', time_str))
-    return hours + minutes
+    """Convert time strings like '1h 30m' to total minutes."""
+    hours, minutes = 0, 0
+    if 'h' in time_str:
+        hours = int(time_str.split('h')[0].strip())
+        time_str = time_str.split('h')[1]
+    if 'm' in time_str:
+        minutes = int(time_str.split('m')[0].strip())
+    return hours * 60 + minutes
 
 
 def extract_tag(title):
@@ -27,6 +27,7 @@ def sum_time(csv_file):
     Leest een CSV-bestand en somt de tijd op per assignee en per tag.
     """
     tag_times = defaultdict(lambda: defaultdict(int))  # {tag: {assignee: minutes}}
+    tag_original_estimates = defaultdict(lambda: defaultdict(int))  # {tag: {assignee: original_estimate_minutes}}
     tag_items = defaultdict(list)  # {tag: [(assignee, title, time_spent, original_estimate, status, issue, sprint)]}
 
     try:
@@ -37,7 +38,7 @@ def sum_time(csv_file):
                 tag = extract_tag(title.upper())
                 assignee = row.get('Assignee', 'Unknown')
                 time_spent = parse_time(row.get('Time spent', '0m'))
-                original_estimate = row.get('Original estimate', 'N/A')
+                original_estimate = parse_time(row.get('Original estimate', 'N/A'))
                 work_ratio = work_ratio_time_to_percentage(row.get('Work Ratio', '-'))
                 status = row.get('Status', 'N/A')
                 issue = row.get('Issue', 'N/A')
@@ -46,6 +47,7 @@ def sum_time(csv_file):
                 title_without_tag = ':'.join(title.split(':')[1:]).strip()
 
                 tag_times[tag][assignee] += time_spent
+                tag_original_estimates[tag][assignee] += original_estimate
                 tag_items[tag].append((assignee, title_without_tag, time_spent, original_estimate, work_ratio,
                                        status, issue, issue_with_url, sprint))
     except Exception as e:
@@ -58,7 +60,12 @@ def sum_time(csv_file):
         for tag, assignees in tag_times.items()
     }
 
-    return formatted_times, tag_items
+    formatted_original_estimates = {
+        tag: {assignee: f"{time // 60}h {time % 60}m" for assignee, time in assignees.items()}
+        for tag, assignees in tag_original_estimates.items()
+    }
+
+    return formatted_times, formatted_original_estimates, tag_items
 
 
 def get_max_title_length(items):
